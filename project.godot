@@ -10,10 +10,18 @@ config_version=5
 
 [application]
 
-config/name="Bussin Wattesigma"
+config/name="TaxDebts Cloud Browser"
 run/main_scene="res://Scenes/CEF.tscn"
 config/features=PackedStringArray("4.3")
 config/icon="res://icon.png"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/mode=3
+window/size/borderless=false
+window/stretch/mode="viewport"
 
 [autoload]
 

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxDebts Cloud Browser API Example</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap');
+        
+        :root {
+            --bg-body: rgb(245, 247, 255);
+            --primary-color: rgb(42, 51, 65);
+            --accent-color: rgb(194, 33, 105);
+            --border-color: rgba(131, 135, 193, 0.4);
+            --shadow-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--primary-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .status.success {
+            background: #ebfbe4;
+            color: #2d5016;
+            border: 1px solid #c9f1c7;
+        }
+        
+        .status.error {
+            background: #ffe7e7;
+            color: #d33a2c;
+            border: 1px solid #fee0e0;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        button {
+            background: linear-gradient(19deg, #21D4FD 0%, #B721FF 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: #b721ff6e -5px 9px 20px 0;
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .code-block {
+            background: #f4f4fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+        }
+        
+        code {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: var(--primary-color);
+        }
+        
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            background: var(--bg-body);
+            border-radius: 12px;
+        }
+        
+        .section h2 {
+            margin-top: 0;
+            color: var(--accent-color);
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Nunito Sans', sans-serif;
+            margin-bottom: 10px;
+        }
+        
+        .log {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #3498db;
+            padding-left: 10px;
+        }
+        
+        .log-entry.error {
+            border-left-color: #e74c3c;
+        }
+        
+        .log-entry.success {
+            border-left-color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 TaxDebts Cloud Browser API Test Page</h1>
+        
+        <div id="browser-status" class="status error">
+            Not running in TaxDebts Browser
+        </div>
+        
+        <div class="section">
+            <h2>Basic Browser Controls</h2>
+            <div class="button-group">
+                <button onclick="testGoBack()">⬅️ Go Back</button>
+                <button onclick="testGoForward()">➡️ Go Forward</button>
+                <button onclick="testReload()">🔄 Reload</button>
+                <button onclick="testGetUrl()">📍 Get Current URL</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Navigation Tests</h2>
+            <input type="text" id="urlInput" placeholder="Enter URL (e.g., https://google.com)" 
+                   value="https://www.google.com">
+            <div class="button-group">
+                <button onclick="testOpenUrl()">🆕 Open in New Tab</button>
+                <button onclick="testNavigateTo()">🔗 Navigate Current Tab</button>
+                <button onclick="testOpenExternal()">🌐 Open External Link</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Example: Open Common Links</h2>
+            <div class="button-group">
+                <button onclick="openIRS()">🏛️ Open IRS.gov</button>
+                <button onclick="openTaxForms()">📄 Open Tax Forms</button>
+                <button onclick="openGoogleDocs()">📝 Open Google Docs</button>
+                <button onclick="openGitHub()">💻 Open GitHub</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Tab & Window Management</h2>
+            <div class="button-group">
+                <button onclick="testCloseTab()">❌ Close Tab</button>
+                <button onclick="testFullscreen(true)">⛶ Enter Fullscreen</button>
+                <button onclick="testFullscreen(false)">⛶ Exit Fullscreen</button>
+                <button onclick="testGetBrowserInfo()">ℹ️ Get Browser Info</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Code Example</h2>
+            <div class="code-block">
+                <code>
+// Check if running in TaxDebts Browser<br>
+if (window.TaxDebtsBrowser && window.TaxDebtsBrowser.isTaxDebtsBrowser()) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;// Open external link in new tab<br>
+&nbsp;&nbsp;&nbsp;&nbsp;window.TaxDebtsBrowser.openExternal('https://irs.gov/forms');<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;// Navigate current tab<br>
+&nbsp;&nbsp;&nbsp;&nbsp;window.TaxDebtsBrowser.navigateTo('https://taxdebts.cloud/dashboard');<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;// Browser controls<br>
+&nbsp;&nbsp;&nbsp;&nbsp;window.TaxDebtsBrowser.goBack();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;window.TaxDebtsBrowser.reload();<br>
+}
+                </code>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>📊 Console Log</h2>
+            <div id="console-log" class="log">
+                <div class="log-entry">Waiting for interactions...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Log function
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('console-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        // Check if running in TaxDebts Browser
+        function checkBrowserStatus() {
+            const statusDiv = document.getElementById('browser-status');
+            if (window.TaxDebtsBrowser && window.TaxDebtsBrowser.isTaxDebtsBrowser()) {
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ Running in TaxDebts Cloud Browser';
+                log('TaxDebts Cloud Browser API detected!', 'success');
+                
+                // Get browser info
+                try {
+                    const info = window.TaxDebtsBrowser.getBrowserInfo();
+                    log(`Browser: ${info.name} v${info.version}`, 'success');
+                } catch (e) {
+                    log(`Error getting browser info: ${e.message}`, 'error');
+                }
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Not running in TaxDebts Browser';
+                log('TaxDebts Browser API not available', 'error');
+            }
+        }
+        
+        // Test functions
+        function testGoBack() {
+            if (window.TaxDebtsBrowser) {
+                window.TaxDebtsBrowser.goBack();
+                log('Going back in history', 'success');
+            } else {
+                log('API not available', 'error');
+            }
+        }
+        
+        function testGoForward() {
+            if (window.TaxDebtsBrowser) {
+                window.TaxDebtsBrowser.goForward();
+                log('Going forward in history', 'success');
+            } else {
+                log('API not available', 'error');
+            }
+        }
+        
+        function testReload() {
+            if (window.TaxDebtsBrowser) {
+                window.TaxDebtsBrowser.reload();
+                log('Reloading page', 'success');
+            } else {
+                log('API not available', 'error');
+            }
+        }
+        
+        function testGetUrl() {
+            if (window.TaxDebtsBrowser) {
+                const url = window.TaxDebtsBrowser.getCurrentUrl();
+                log(`Current URL: ${url}`, 'success');
+                alert(`Current URL: ${url}`);
+            } else {
+                log('API not available', 'error');
+            }
+        }
+        
+        function testOpenUrl() {
+            const url = document.getElementById('urlInput').value;
+            if (window.TaxDebtsBrowser) {
+                window.TaxDebtsBrowser.openUrl(url);
+                log(`Opening URL in new tab: ${url}`, 'success');
+            } else {
+                log('API not available', 'error');
+            }
+        }
+        
+        function testNavigateTo() {
+            const url = document.getElementById('urlInput').value;
+            if (window.TaxDebtsBrowser) {
+                window.TaxDebtsBrowser.navigateTo(url);
+                log(`Navigating to: ${url}`, 'success');
+            } else {
+                log('API not available', 'error');
+            }
+        }
+        
+        function testOpenExternal() {
+            const url = document.getElementById('urlInput').value;
+            if (window.TaxDebtsBrowser) {
+                window.TaxDebtsBrowser.openExternal(url, true);
+                log(`Opening external link: ${url}`, 'success');
+            } else {
+                log('API not available', 'error');
+            }
+        }
+        
+        function testCloseTab() {
+            if (window.TaxDebtsBrowser) {
+                if (confirm('Are you sure you want to close this tab?')) {
+                    window.TaxDebtsBrowser.closeTab();
+                    log('Closing current tab', 'success');
+                }
+            } else {
+                log('API not available', 'error');
+            }
+        }
+        
+        function testFullscreen(enable) {
+            if (window.TaxDebtsBrowser) {
+                window.TaxDebtsBrowser.setFullscreen(enable);
+                log(`Setting fullscreen: ${enable}`, 'success');
+            } else {
+                log('API not available', 'error');
+            }
+        }
+        
+        function testGetBrowserInfo() {
+            if (window.TaxDebtsBrowser) {
+                const info = window.TaxDebtsBrowser.getBrowserInfo();
+                log(`Browser Info: ${JSON.stringify(info)}`, 'success');
+                alert(JSON.stringify(info, null, 2));
+            } else {
+                log('API not available', 'error');
+            }
+        }
+        
+        // Example link openers
+        function openIRS() {
+            if (window.TaxDebtsBrowser) {
+                window.TaxDebtsBrowser.openExternal('https://www.irs.gov');
+                log('Opening IRS.gov', 'success');
+            }
+        }
+        
+        function openTaxForms() {
+            if (window.TaxDebtsBrowser) {
+                window.TaxDebtsBrowser.openExternal('https://www.irs.gov/forms-pubs');
+                log('Opening IRS Tax Forms', 'success');
+            }
+        }
+        
+        function openGoogleDocs() {
+            if (window.TaxDebtsBrowser) {
+                window.TaxDebtsBrowser.openExternal('https://docs.google.com');
+                log('Opening Google Docs', 'success');
+            }
+        }
+        
+        function openGitHub() {
+            if (window.TaxDebtsBrowser) {
+                window.TaxDebtsBrowser.openExternal('https://github.com');
+                log('Opening GitHub', 'success');
+            }
+        }
+        
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            checkBrowserStatus();
+            log('Test page loaded', 'info');
+        });
+    </script>
+</body>
+</html>
+

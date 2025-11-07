@@ -1,4 +1,4 @@
-# Bussin Wattesigma
+# TaxDebts Cloud Browser
 
 <img style="width: 128px; height: 128px" src="Website\static\favicon.png" />
 
@@ -8,13 +8,23 @@ https://github.com/user-attachments/assets/192a330c-4102-4b84-b50d-1f1698d87fa7
 
 
 
-The ultimate web browser, built with a game engine.
+A dedicated browser application built specifically for taxdebts.cloud CRM.
 
-https://wattesigma.com
+https://taxdebts.cloud
 
 ## About
 
-Bussin Wattesigma is a web browser built with the Godot Engine and powered by the Chromium Embedded Framework (CEF). It revolutionises the web browsing experience by allowing you to use **shaders** and a bunch of other stuff that is supposed to "entertain" you.
+TaxDebts Cloud Browser is a custom web browser built with the Godot Engine and powered by the Chromium Embedded Framework (CEF). It is specifically designed for the **taxdebts.cloud** CRM platform, providing:
+
+- **Fullscreen Experience**: Opens directly to taxdebts.cloud in fullscreen mode
+- **Custom Browser API**: JavaScript API that allows taxdebts.cloud to control the browser
+- **Seamless External Links**: Open external websites (IRS, documents, etc.) without leaving the CRM
+- **Tab Management**: Multiple tabs managed through the taxdebts.cloud interface
+- **Integrated Theme**: Uses taxdebts.cloud color scheme throughout the browser UI
+
+### For TaxDebts Cloud Developers
+
+See [TAXDEBTS_API_DOCUMENTATION.md](TAXDEBTS_API_DOCUMENTATION.md) for detailed API documentation and usage examples.
 
 ## Setup and Installation
 
@@ -64,11 +74,34 @@ Written by mxjeonsgw
   
 ## Usage
 
-- Launch the Bussin Wattesigma browser
-- If run for the first time, you'll be greeted with a welcome page.
-- Press `CTRL` + `I` for all the available shortcuts.
-- Press `CTRL` + `L` and enter a URL in the address bar.
-- Press `CTRL` + `S` to change some settings.
+- Launch the TaxDebts Cloud Browser
+- The browser opens fullscreen directly to taxdebts.cloud
+- Use the JavaScript API from taxdebts.cloud to control the browser (see API documentation)
+- Press `CTRL` + `I` to see all available keyboard shortcuts
+- Press `CTRL` + `L` to manually enter a URL in the address bar
+- Press `CTRL` + `S` to change browser settings
+- Press `CTRL` + `T` to view all open tabs
+
+### JavaScript API Quick Start
+
+From your taxdebts.cloud website:
+
+```javascript
+// Check if running in TaxDebts Browser
+if (window.TaxDebtsBrowser && window.TaxDebtsBrowser.isTaxDebtsBrowser()) {
+    // Open external link in new tab
+    window.TaxDebtsBrowser.openExternal('https://irs.gov/forms');
+    
+    // Navigate current tab
+    window.TaxDebtsBrowser.navigateTo('https://taxdebts.cloud/dashboard');
+    
+    // Browser controls
+    window.TaxDebtsBrowser.goBack();
+    window.TaxDebtsBrowser.reload();
+}
+```
+
+See [TAXDEBTS_API_DOCUMENTATION.md](TAXDEBTS_API_DOCUMENTATION.md) for complete API reference.
 
 ## Contributing
 

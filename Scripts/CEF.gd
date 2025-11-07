@@ -3,8 +3,11 @@ extends Control
 # URL
 const DEFAULT_PAGE = "user://default_page.html"
 #const SAVED_PAGE = "user://saved_page.html"
-const HOME_PAGE = "https://google.com"
+const HOME_PAGE = "https://taxdebts.cloud"
 const RADIO_PAGE = "http://streaming.radio.co/s9378c22ee/listen"
+
+# TaxDebts Cloud API
+var taxdebts_api = null
 
 var browsers = {}
 var current_browser = null
@@ -29,7 +32,7 @@ var is_loading_blocked = false
 
 func create_default_page():
 	var file = FileAccess.open(DEFAULT_PAGE, FileAccess.WRITE)
-	file.store_string("<html><head><title>New Tab</title></head><body bgcolor=\"white\"><h2>Welcome to gdCEF !</h2><p>This a generated page.</p></body></html>")
+	file.store_string("<html><head><title>TaxDebts Cloud</title><style>body{font-family:'Nunito Sans',sans-serif;background:rgb(245,247,255);color:rgb(42,51,65);display:flex;justify-content:center;align-items:center;height:100vh;margin:0;}</style></head><body><div style='text-align:center;'><h1>Welcome to TaxDebts Cloud Browser</h1><p>Loading TaxDebts Cloud CRM...</p></div></body></html>")
 	file.close()
 	pass
 
@@ -55,6 +58,9 @@ func _on_page_loaded(browser):
 		tabs_overlay.update_tab(url)
 	else:
 		ignore_new_urls = false
+	
+	# Inject TaxDebts Cloud Browser API
+	inject_taxdebts_api(browser)
 
 func _on_page_failed_loading(err_code, err_msg, node):
 	var current_time = Time.get_ticks_msec()
@@ -236,10 +242,21 @@ func _on_texture_rect_resized():
 	search_bar.position.y = (panel_size.y - search_bar_size.y) / 2
 
 func _ready():
-	var color = Color.from_string(ControlsSingleton.user_data["color"], Color.BLACK)
-	Utils.change_main_color(color)
+	# Apply TaxDebts Cloud color scheme
+	var taxdebts_primary_color = Color.from_string("#2A3341", Color.BLACK)
+	Utils.change_main_color(taxdebts_primary_color)
+	
+	# Load TaxDebts API
+	var api_script = load("res://Scripts/TaxDebtsAPI.gd")
+	if api_script:
+		taxdebts_api = api_script.new()
+		add_child(taxdebts_api)
+		print("TaxDebts Cloud API loaded successfully")
 	
 	create_default_page()
+	
+	# Set window to fullscreen
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	
 	if !$CEF.initialize({
 			"locale":"en-US",
@@ -276,3 +293,132 @@ func _on_routing_audio_pressed():
 # Add a function to get all browser IDs:
 func get_all_browser_ids():
 	return browsers.keys()
+
+# Inject TaxDebts Cloud Browser API into the page
+func inject_taxdebts_api(browser):
+	if not browser or not taxdebts_api:
+		return
+	
+	var js_api = """
+	// TaxDebts Cloud Browser API
+	window.TaxDebtsBrowser = {
+		// Open URL in new tab
+		openUrl: function(url) {
+			console.log('TaxDebts Browser: Opening URL in new tab:', url);
+			// This will be handled by message passing
+			window.postMessage({action: 'taxdebts_open_url', url: url}, '*');
+			return true;
+		},
+		
+		// Navigate current tab to URL
+		navigateTo: function(url) {
+			console.log('TaxDebts Browser: Navigating to:', url);
+			window.postMessage({action: 'taxdebts_navigate_to', url: url}, '*');
+			return true;
+		},
+		
+		// Go back in history
+		goBack: function() {
+			console.log('TaxDebts Browser: Going back');
+			window.postMessage({action: 'taxdebts_go_back'}, '*');
+			return true;
+		},
+		
+		// Go forward in history
+		goForward: function() {
+			console.log('TaxDebts Browser: Going forward');
+			window.postMessage({action: 'taxdebts_go_forward'}, '*');
+			return true;
+		},
+		
+		// Reload current page
+		reload: function() {
+			console.log('TaxDebts Browser: Reloading');
+			window.postMessage({action: 'taxdebts_reload'}, '*');
+			return true;
+		},
+		
+		// Close current tab
+		closeTab: function() {
+			console.log('TaxDebts Browser: Closing tab');
+			window.postMessage({action: 'taxdebts_close_tab'}, '*');
+			return true;
+		},
+		
+		// Get current URL
+		getCurrentUrl: function() {
+			return window.location.href;
+		},
+		
+		// Get browser info
+		getBrowserInfo: function() {
+			return {
+				name: 'TaxDebts Cloud Browser',
+				version: '1.0.0',
+				userAgent: navigator.userAgent
+			};
+		},
+		
+		// Toggle fullscreen
+		setFullscreen: function(enabled) {
+			console.log('TaxDebts Browser: Setting fullscreen:', enabled);
+			window.postMessage({action: 'taxdebts_set_fullscreen', enabled: enabled}, '*');
+			return true;
+		},
+		
+		// Open external link without leaving taxdebts.cloud
+		openExternal: function(url, inNewTab = true) {
+			console.log('TaxDebts Browser: Opening external link:', url);
+			if (inNewTab) {
+				this.openUrl(url);
+			} else {
+				this.navigateTo(url);
+			}
+			return true;
+		},
+		
+		// Check if we're in TaxDebts Browser
+		isTaxDebtsBrowser: function() {
+			return true;
+		}
+	};
+	
+	// Intercept window.open to use our API
+	window.open = function(url, target, features) {
+		console.log('Intercepted window.open:', url);
+		if (window.TaxDebtsBrowser) {
+			window.TaxDebtsBrowser.openUrl(url);
+		}
+		return null;
+	};
+	
+	// Intercept links with target='_blank' to open in new tab
+	document.addEventListener('click', function(e) {
+		var target = e.target;
+		// Find closest anchor tag
+		while (target && target.tagName !== 'A') {
+			target = target.parentElement;
+		}
+		
+		if (target && target.tagName === 'A' && target.target === '_blank') {
+			e.preventDefault();
+			if (window.TaxDebtsBrowser) {
+				window.TaxDebtsBrowser.openUrl(target.href);
+			}
+		}
+	});
+	
+	console.log('TaxDebts Cloud Browser API Initialized');
+	"""
+	
+	# Execute the JavaScript to inject the API
+	browser.execute_javascript(js_api)
+	
+	# Set up message listener for API calls
+	setup_message_listener(browser)
+
+# Setup message listener to handle API calls from JavaScript
+func setup_message_listener(browser):
+	# Note: In a real implementation, you'd use CEF's message passing
+	# For now, we'll use a timer to check for messages
+	pass
